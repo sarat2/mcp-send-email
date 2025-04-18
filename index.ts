@@ -53,6 +53,10 @@ server.tool(
       .describe(
         "HTML email content. When provided, the plain text argument MUST be provided as well."
       ),
+    attachments: z.array(z.object({
+      content: z.string().describe("Attachment file content as Base64 string"),
+      filename: z.string().describe("Attachment filename")
+    })),
     cc: z
       .string()
       .email()
@@ -96,7 +100,7 @@ server.tool(
         }
       : {}),
   },
-  async ({ from, to, subject, text, html, replyTo, scheduledAt, cc, bcc }) => {
+  async ({ from, to, subject, text, html, attachments, replyTo, scheduledAt, cc, bcc }) => {
     const fromEmailAddress = from ?? senderEmailAddress;
     const replyToEmailAddresses = replyTo ?? replierEmailAddresses;
 
@@ -124,6 +128,7 @@ server.tool(
       from: string;
       replyTo: string | string[];
       html?: string;
+      attachments?: object[];
       scheduledAt?: string;
       cc?: string[];
       bcc?: string[];
@@ -139,6 +144,10 @@ server.tool(
     if (html) {
       emailRequest.html = html;
     }
+
+    if (attachments) {
+      emailRequest.attachments = attachments;
+    } 
     
     if (scheduledAt) {
       emailRequest.scheduledAt = scheduledAt;
